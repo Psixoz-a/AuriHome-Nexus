@@ -32,7 +32,6 @@ const dictionary: Record<string, { en: string; ru: string }> = {
   'nav.dashboard': { en: 'Dashboard', ru: 'Дашборд' },
   'nav.devices': { en: 'Device Manager', ru: 'Устройства' },
   'nav.scenarios': { en: 'Logic Builder', ru: 'Сценарии' },
-  'nav.billing': { en: 'License', ru: 'Лицензия' },
   'nav.settings': { en: 'System Config', ru: 'Настройки' },
   'nav.logout': { en: 'Disconnect', ru: 'Выход' },
   'nav.language': { en: 'Language', ru: 'Язык' },
@@ -110,11 +109,6 @@ const dictionary: Record<string, { en: string; ru: string }> = {
   'settings.security.2fa_desc': { en: 'Secure your account', ru: 'Защита аккаунта' },
   'settings.remote.active': { en: 'Active', ru: 'Активен' },
   'settings.remote.offline': { en: 'Offline', ru: 'Отключен' },
-
-  // Billing
-  'billing.title': { en: 'Subscription', ru: 'Подписка' },
-  'billing.plans': { en: 'Available Plans', ru: 'Доступные планы' },
-  'billing.payment': { en: 'Payment Method', ru: 'Способ оплаты' },
 
   // Local Hub
   'local.title': { en: 'AuriHome Core', ru: 'AuriHome Core' },

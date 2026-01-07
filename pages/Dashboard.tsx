@@ -76,12 +76,14 @@ export const Dashboard = () => {
       const startX = 50 + (col * (width + gap));
       const startY = 50 + (row * (height + gap));
 
-      const safeX = startX > 600 ? 50 : startX;
-      const safeY = startY > 300 ? 50 : startY;
+      // Reset to top if we run out of vertical space significantly, 
+      // though map is responsive in simple grid for now.
+      const safeX = startX > 800 ? 50 : startX;
+      const safeY = startY > 600 ? 50 : startY;
 
       const newRoom: RoomConfig = {
           id: Math.random().toString(36).substr(2, 9),
-          name: name,
+          name: name.trim(),
           path: `M ${safeX} ${safeY} L ${safeX + width} ${safeY} L ${safeX + width} ${safeY + height} L ${safeX} ${safeY + height} Z`,
           x: safeX,
           y: safeY,

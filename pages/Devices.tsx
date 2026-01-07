@@ -26,6 +26,7 @@ export const Devices = () => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [search, setSearch] = useState('');
   const [activeRoom, setActiveRoom] = useState('All');
+  const [existingRooms, setExistingRooms] = useState<string[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useLanguage();
@@ -51,12 +52,19 @@ export const Devices = () => {
 
   const fetchData = async () => {
         setIsLoading(true);
-        const d = await db.getDevices();
+        const [d, u] = await Promise.all([db.getDevices(), db.getUser()]);
         setDevices(d);
+        
+        // Extract rooms from FloorPlan AND existing devices to suggest in modal
+        const mapRooms = u.settings.floorPlan ? u.settings.floorPlan.map(r => r.name) : [];
+        const deviceRooms = d.map(dev => dev.room).filter(Boolean) as string[];
+        const uniqueRooms = Array.from(new Set([...mapRooms, ...deviceRooms]));
+        setExistingRooms(uniqueRooms);
+
         setIsLoading(false);
   };
 
-  // Extract unique rooms
+  // Filter list for Room Tabs (Apple Home Style)
   const rooms = ['All', ...Array.from(new Set(devices.map(d => d.room || 'Unassigned')))];
 
   const handleToggle = async (e: React.MouseEvent, id: string, currentState: any) => {
@@ -97,11 +105,14 @@ export const Devices = () => {
         initialState.humidity = 45;
     }
 
+    // Ensure room name is clean for matching
+    const cleanRoom = newDevice.room.trim();
+
     const newDev = await db.addDevice({
       userId: 'u1',
       name: newDevice.name,
       type: newDevice.type,
-      room: newDevice.room,
+      room: cleanRoom,
       mqttTopic: newDevice.topic || undefined,
       state: initialState
     });
@@ -110,6 +121,12 @@ export const Devices = () => {
     mqttService.connect();
 
     setDevices(prev => [...prev, newDev]);
+    
+    // Update local existing rooms if new one was typed
+    if (cleanRoom && !existingRooms.includes(cleanRoom)) {
+        setExistingRooms(prev => [...prev, cleanRoom]);
+    }
+
     resetModal();
     toast('Device provisioned & subscribed', 'success');
   };
@@ -125,7 +142,9 @@ export const Devices = () => {
 
   const resetModal = () => {
     setIsAddModalOpen(false);
-    setNewDevice({ name: '', type: DeviceType.LIGHT, room: 'Living Room', topic: '' });
+    // Suggest first room if available
+    const defaultRoom = existingRooms.length > 0 ? existingRooms[0] : 'Living Room';
+    setNewDevice({ name: '', type: DeviceType.LIGHT, room: defaultRoom, topic: '' });
   };
 
   const filteredDevices = devices.filter(d => {
@@ -288,13 +307,22 @@ export const Devices = () => {
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300">Room</label>
-                            <Input 
-                                value={newDevice.room} 
-                                onChange={e => setNewDevice({...newDevice, room: e.target.value})} 
-                                placeholder="e.g. Living Room" 
-                                required 
-                                className="bg-slate-950"
-                            />
+                            <div className="relative">
+                                <Input 
+                                    value={newDevice.room} 
+                                    onChange={e => setNewDevice({...newDevice, room: e.target.value})} 
+                                    placeholder="Select or type..." 
+                                    required 
+                                    list="room-suggestions"
+                                    className="bg-slate-950"
+                                />
+                                <datalist id="room-suggestions">
+                                    {existingRooms.map(r => (
+                                        <option key={r} value={r} />
+                                    ))}
+                                </datalist>
+                                <p className="text-[10px] text-slate-500 mt-1">Select from existing rooms to link with Dashboard Map</p>
+                            </div>
                         </div>
 
                         <div className="space-y-2">

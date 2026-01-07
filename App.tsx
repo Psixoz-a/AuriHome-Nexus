@@ -14,7 +14,6 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard').then(module => ({
 const Devices = React.lazy(() => import('./pages/Devices').then(module => ({ default: module.Devices })));
 const DeviceDetail = React.lazy(() => import('./pages/DeviceDetail').then(module => ({ default: module.DeviceDetail })));
 const Scenarios = React.lazy(() => import('./pages/Scenarios').then(module => ({ default: module.Scenarios })));
-const Billing = React.lazy(() => import('./pages/Billing').then(module => ({ default: module.Billing })));
 const Settings = React.lazy(() => import('./pages/Settings').then(module => ({ default: module.Settings })));
 const LocalHub = React.lazy(() => import('./pages/LocalHub').then(module => ({ default: module.LocalHub })));
 
@@ -163,7 +162,6 @@ export default function App() {
               <Route path="/cloud/devices" element={isAuthenticated ? <CloudLayout onLogout={handleLogout}><Devices /></CloudLayout> : <Navigate to="/login" />} />
               <Route path="/cloud/devices/:id" element={isAuthenticated ? <CloudLayout onLogout={handleLogout}><DeviceDetail /></CloudLayout> : <Navigate to="/login" />} />
               <Route path="/cloud/scenarios" element={isAuthenticated ? <CloudLayout onLogout={handleLogout}><Scenarios /></CloudLayout> : <Navigate to="/login" />} />
-              <Route path="/cloud/billing" element={isAuthenticated ? <CloudLayout onLogout={handleLogout}><Billing /></CloudLayout> : <Navigate to="/login" />} />
               <Route path="/cloud/settings" element={isAuthenticated ? <CloudLayout onLogout={handleLogout}><Settings /></CloudLayout> : <Navigate to="/login" />} />
               <Route path="/cloud/*" element={<Navigate to="/cloud" />} />
 

@@ -7,9 +7,6 @@ import {
   Workflow, 
   Settings, 
   LogOut, 
-  Menu, 
-  X,
-  CreditCard,
   UserCircle,
   Home
 } from 'lucide-react';
@@ -24,7 +21,6 @@ interface CloudLayoutProps {
 }
 
 const CloudLayout: React.FC<CloudLayoutProps> = ({ children, onLogout }) => {
-  const [isSidebarOpen, setSidebarOpen] = useState(false); // Default closed on mobile, logic handled by css
   const location = useLocation();
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
@@ -33,17 +29,11 @@ const CloudLayout: React.FC<CloudLayoutProps> = ({ children, onLogout }) => {
     { label: t('nav.dashboard'), icon: LayoutDashboard, path: '/cloud' },
     { label: t('nav.devices'), icon: Smartphone, path: '/cloud/devices' },
     { label: t('nav.scenarios'), icon: Workflow, path: '/cloud/scenarios' },
-    { label: t('nav.billing'), icon: CreditCard, path: '/cloud/billing' },
     { label: t('nav.settings'), icon: Settings, path: '/cloud/settings' },
   ];
 
-  // Mobile Bottom Nav Items (Subset)
-  const mobileNavItems = [
-    { label: t('nav.dashboard'), icon: LayoutDashboard, path: '/cloud' },
-    { label: t('nav.devices'), icon: Smartphone, path: '/cloud/devices' },
-    { label: t('nav.scenarios'), icon: Workflow, path: '/cloud/scenarios' },
-    { label: t('nav.settings'), icon: UserCircle, path: '/cloud/settings' },
-  ];
+  // Mobile Bottom Nav Items (Same as desktop for consistency now that billing is gone)
+  const mobileNavItems = navItems;
 
   return (
     <div className="min-h-screen bg-slate-950 flex font-sans text-slate-200 selection:bg-indigo-500/30">
