@@ -149,7 +149,3 @@ We are actively developing AuriHome Nexus. Here is our vision:
 - [ ] **Голос:** Локальное распознавание команды активации ("Привет, Дом").
 - [ ] **Видео:** Запись потоков с камер (NVR).
 - [ ] **Matter:** Поддержка нового стандарта умного дома.
-
----
-
-**Developed with ❤️ by [Your Name]**
