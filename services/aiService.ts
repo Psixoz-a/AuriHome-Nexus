@@ -3,28 +3,6 @@ import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
 import { db } from "./mockDb";
 import { Device, AIProvider } from "../types";
 
-// --- Tools Definition (Shared) ---
-const TOOLS = [
-  {
-    name: 'controlDevice',
-    description: 'Control smart home devices. Supports single devices or bulk actions (e.g. "all lights").',
-    parameters: {
-      type: 'object',
-      properties: {
-        deviceName: { type: 'string', description: 'Name of device OR "all", "lights", "kitchen devices"' },
-        action: { type: 'string', description: 'ON, OFF, SET_TEMP, SET_BRIGHTNESS, LOCK, UNLOCK' },
-        value: { type: 'number', description: 'Value for temp/brightness' },
-      },
-      required: ['deviceName', 'action']
-    }
-  },
-  {
-    name: 'getDevices',
-    description: 'Get list of devices and their current status properties.',
-    parameters: { type: 'object', properties: {} }
-  }
-];
-
 interface ControlDeviceArgs {
     deviceName: string;
     action: string;
@@ -69,29 +47,48 @@ class AIService {
     
     const ai = new GoogleGenAI({ apiKey });
     
-    // Map internal tools definition to Gemini SDK format
-    const geminiTools: FunctionDeclaration[] = TOOLS.map(t => ({
-      name: t.name,
-      description: t.description,
+    // Explicitly typed Tool Definition for Google GenAI SDK
+    const controlDeviceTool: FunctionDeclaration = {
+      name: 'controlDevice',
+      description: 'Control smart home devices. Supports single devices or bulk actions (e.g. "all lights").',
       parameters: {
-          type: Type.OBJECT,
-          properties: t.parameters.properties as any,
-          required: t.parameters.required
+        type: Type.OBJECT,
+        properties: {
+          deviceName: { 
+              type: Type.STRING, 
+              description: 'Name of device OR "all", "lights", "kitchen devices"' 
+          },
+          action: { 
+              type: Type.STRING, 
+              description: 'ON, OFF, SET_TEMP, SET_BRIGHTNESS, LOCK, UNLOCK' 
+          },
+          value: { 
+              type: Type.NUMBER, 
+              description: 'Value for temp/brightness' 
+          },
+        },
+        required: ['deviceName', 'action']
       }
-    }));
+    };
+
+    const getDevicesTool: FunctionDeclaration = {
+        name: 'getDevices',
+        description: 'Get list of devices and their current status properties.',
+        parameters: { type: Type.OBJECT, properties: {} }
+    };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash-preview-12-2025', // Using the latest recommended model
       contents: message,
       config: {
         systemInstruction: systemPrompt,
-        tools: [{ functionDeclarations: geminiTools }],
+        tools: [{ functionDeclarations: [controlDeviceTool, getDevicesTool] }],
       },
     });
 
     // Handle Function Calls
     const candidate = response.candidates?.[0];
-    if (candidate) {
+    if (candidate && candidate.content && candidate.content.parts) {
          for (const part of candidate.content.parts) {
              if (part.functionCall) {
                  // Cast args to expected type safely
@@ -109,7 +106,33 @@ class AIService {
   private async callOpenAI(message: string, systemPrompt: string, apiKey: string): Promise<string> {
     if (!apiKey) return "Please configure OpenAI API Key in Settings.";
 
-    const tools = TOOLS.map(t => ({ type: 'function', function: t }));
+    // OpenAI uses a slightly different schema format, but compatible structure
+    const tools = [
+        {
+            type: 'function',
+            function: {
+                name: 'controlDevice',
+                description: 'Control smart home devices.',
+                parameters: {
+                    type: 'object',
+                    properties: {
+                        deviceName: { type: 'string', description: 'Device name' },
+                        action: { type: 'string', description: 'ON, OFF, etc' },
+                        value: { type: 'number' }
+                    },
+                    required: ['deviceName', 'action']
+                }
+            }
+        },
+        {
+            type: 'function',
+            function: {
+                name: 'getDevices',
+                description: 'Get device list',
+                parameters: { type: 'object', properties: {} }
+            }
+        }
+    ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -118,7 +141,7 @@ class AIService {
             'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-            model: 'gpt-3.5-turbo', // Cost-effective default
+            model: 'gpt-3.5-turbo',
             messages: [
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: message }

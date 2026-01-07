@@ -4,7 +4,7 @@ import { HashRouter as Router, Routes, Route, Navigate, Link } from 'react-route
 import CloudLayout from './layouts/CloudLayout';
 import LocalLayout from './layouts/LocalLayout';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from './components/ui';
-import { ArrowRight, ShieldCheck, Wifi, Loader2 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Wifi, Loader2, ArrowLeft } from 'lucide-react';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { mqttService } from './services/mqttService';
@@ -94,14 +94,21 @@ const Login = ({ onLogin }: { onLogin: () => void }) => {
             <div className="space-y-2">
               <Input type="password" placeholder="Password" defaultValue="password" className="bg-slate-950 border-slate-700" />
             </div>
-            <Button className="w-full" disabled={loading}>
+            <Button className="w-full bg-indigo-600 hover:bg-indigo-500" disabled={loading}>
               {loading ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('auth.button.authenticating')}</>
               ) : (
                   t('auth.button.signin')
               )}
             </Button>
-            <div className="relative">
+
+            <Link to="/" className="w-full block">
+                <Button type="button" variant="ghost" className="w-full border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700">
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Mode Selection
+                </Button>
+            </Link>
+
+            <div className="relative mt-4">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-slate-800" />
               </div>

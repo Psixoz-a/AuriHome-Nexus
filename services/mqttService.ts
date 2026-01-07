@@ -86,7 +86,9 @@ class MqttService {
    * Handles incoming MQTT messages from real hardware.
    * Updates the Local DB so UI reflects reality.
    */
-  private async handleIncomingMessage(topic: string, message: Buffer) {
+  private async handleIncomingMessage(topic: string, message: any) {
+    // FIX: 'message' in browser MQTT.js might be Uint8Array or similar, not Node Buffer.
+    // We safely convert it to string.
     const payloadStr = message.toString();
     console.log(`📥 MQTT IN [${topic}]: ${payloadStr}`);
 

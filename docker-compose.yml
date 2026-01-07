@@ -1,0 +1,39 @@
+
+version: '3.8'
+
+services:
+  # 1. The React Application (Next.js/Vite)
+  aurihome-web:
+    container_name: aurihome_nexus
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - mosquitto
+    networks:
+      - smart-home-net
+
+  # 2. MQTT Broker (Mosquitto)
+  # Critical: Enables WebSockets on port 9001 for the Web UI to connect
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: aurihome_mqtt
+    ports:
+      - "1883:1883" # Standard MQTT (Device to Hub)
+      - "9001:9001" # WebSockets (Web UI to Hub)
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+    networks:
+      - smart-home-net
+
+networks:
+  smart-home-net:
+    driver: bridge
