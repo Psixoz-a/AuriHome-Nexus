@@ -1,0 +1,14 @@
+
+{
+  "appId": "com.aurihome.nexus",
+  "appName": "AuriHome Nexus",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  }
+}
